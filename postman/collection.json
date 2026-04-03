@@ -1,0 +1,383 @@
+{
+  "info": {
+    "name": "MuleSoft Integration Platform API",
+    "description": "Collection complète pour tester l'API MuleSoft Integration Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12345678"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🏠 Health Check",
+      "item": [
+        {
+          "name": "Health Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Vérify l'état du serveur"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔗 Integrations",
+      "item": [
+        {
+          "name": "Get All Integrations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/integrations",
+              "host": ["{{base_url}}"],
+              "path": ["integrations"]
+            },
+            "description": "Récupère toutes les intégrations"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Integration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My REST API\",\n  \"type\": \"REST\",\n  \"config\": {\n    \"endpoint\": \"https://jsonplaceholder.typicode.com/posts\",\n    \"method\": \"GET\",\n    \"headers\": {\n      \"Accept\": \"application/json\"\n    },\n    \"timeout\": 30000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/integrations",
+              "host": ["{{base_url}}"],
+              "path": ["integrations"]
+            },
+            "description": "Crée une nouvelle intégration"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Integration by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/integrations/:id",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Récupère une intégration spécifique"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Integration",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated REST API\",\n  \"config\": {\n    \"endpoint\": \"https://jsonplaceholder.typicode.com/posts/1\",\n    \"method\": \"GET\",\n    \"timeout\": 45000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/integrations/:id",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Modifie une intégration existante"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Integration",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/integrations/:id",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Supprime une intégration"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Integration",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/integrations/:id/test",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", ":id", "test"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Teste une intégration en exécutant l'appel API"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📝 Logs",
+      "item": [
+        {
+          "name": "Get All Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/logs?status=success&limit=50&skip=0",
+              "host": ["{{base_url}}"],
+              "path": ["logs"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "success",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "skip",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Récupère tous les logs (avec filtres optionnels)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Log by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/logs/:id",
+              "host": ["{{base_url}}"],
+              "path": ["logs", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Récupère un log spécifique par ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Logs by Integration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/logs/integration/:integrationId?limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["logs", "integration", ":integrationId"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "integrationId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Récupère tous les logs d'une intégration spécifique"
+          },
+          "response": []
+        },
+        {
+          "name": "Export Logs CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/logs/export/csv?integrationId=&startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["logs", "export", "csv"],
+              "query": [
+                {
+                  "key": "integrationId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                }
+              ]
+            },
+            "description": "Exporte les logs en CSV"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Statistics",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["stats", "dashboard"]
+            },
+            "description": "Récupère les statistiques du dashboard (globales)"
+          },
+          "response": []
+        },
+        {
+          "name": "Stats by Integration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/integration/:id?period=7d",
+              "host": ["{{base_url}}"],
+              "path": ["stats", "integration", ":id"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "7d"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Récupère les statistiques d'une intégration (7 derniers jours)"
+          },
+          "response": []
+        },
+        {
+          "name": "Hourly Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/hourly?integrationId=&hours=24",
+              "host": ["{{base_url}}"],
+              "path": ["stats", "hourly"],
+              "query": [
+                {
+                  "key": "integrationId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hours",
+                  "value": "24"
+                }
+              ]
+            },
+            "description": "Récupère les statistiques horaires"
+          },
+          "response": []
+        },
+        {
+          "name": "Error Distribution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/errors?period=30d",
+              "host": ["{{base_url}}"],
+              "path": ["stats", "errors"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            },
+            "description": "Récupère la distribution des erreurs (derniers 30 jours)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "your-jwt-token-here",
+      "type": "string"
+    }
+  ]
+} 

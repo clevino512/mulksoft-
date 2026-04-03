@@ -1,0 +1,92 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Create Deployment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              environment: 'production',
+              auto_merge: false,
+              required_contexts: []
+            });
+            console.log(deployment.data);
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/mulesoft-backend:latest
+            ${{ secrets.DOCKER_USERNAME }}/mulesoft-backend:${{ github.sha }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./Frontend
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/mulesoft-frontend:latest
+            ${{ secrets.DOCKER_USERNAME }}/mulesoft-frontend:${{ github.sha }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Deploy to Server
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+          
+          ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+            cd /app/mulesoft
+            git pull origin main
+            docker-compose pull
+            docker-compose up -d
+            docker-compose exec -T backend npm test
+          EOF
+      
+      - name: Health Check
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.DEPLOY_HOST }}:5000/api/health || exit 1
+      
+      - name: Create Deployment Status
+        uses: actions/github-script@v6
+        if: always()
+        with:
+          script: |
+            const status = '${{ job.status }}' === 'success' ? 'success' : 'failure';
+            github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment.id,
+              state: status,
+              description: 'Deployment ' + status
+            });
