@@ -68,8 +68,8 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
           .get('/api/integrations');
         
         expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-        expect(response.body.length).toBe(0);
+        expect(Array.isArray(response.body.integrations)).toBe(true);
+        expect(response.body.integrations.length).toBe(0);
       });
 
       it('should return all integrations', async () => {
@@ -79,8 +79,8 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
           .get('/api/integrations');
         
         expect(response.status).toBe(200);
-        expect(response.body.length).toBe(1);
-        expect(response.body[0].name).toBe(validIntegrationData.name);
+        expect(response.body.integrations.length).toBe(1);
+        expect(response.body.integrations[0].name).toBe(validIntegrationData.name);
       });
 
       it('should support pagination', async () => {
@@ -92,10 +92,10 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
         }
         
         const response = await request(app)
-          .get('/api/integrations?limit=2&skip=0');
+          .get('/api/integrations?limit=2&page=1');
         
         expect(response.status).toBe(200);
-        expect(response.body.length).toBeLessThanOrEqual(2);
+        expect(response.body.integrations.length).toBeLessThanOrEqual(2);
       });
     });
 
@@ -146,7 +146,7 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
           .post('/api/integrations')
           .send(validIntegrationData);
         
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(409);
       });
     });
 
@@ -248,7 +248,7 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
           .post(`/api/integrations/${integration._id}/test`);
         
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('success');
       });
 
       it('should handle test failure gracefully', async () => {
@@ -308,8 +308,8 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
           .get('/api/logs');
         
         expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-        expect(response.body.length).toBeGreaterThan(0);
+        expect(Array.isArray(response.body.logs)).toBe(true);
+        expect(response.body.logs.length).toBeGreaterThan(0);
       });
 
       it('should filter logs by level', async () => {
@@ -331,7 +331,7 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
           .get('/api/logs?level=info');
         
         expect(response.status).toBe(200);
-        expect(response.body.every(log => log.level === 'info')).toBe(true);
+        expect(response.body.logs.every(log => log.level === 'info')).toBe(true);
       });
     });
 
@@ -381,7 +381,7 @@ describe('MuleSoft Integration Platform - Integration Tests', () => {
           .get(`/api/logs/integration/${integration1._id}`);
         
         expect(response.status).toBe(200);
-        expect(response.body.every(log => 
+        expect(response.body.logs.every(log => 
           log.integrationId === integration1._id.toString()
         )).toBe(true);
       });
