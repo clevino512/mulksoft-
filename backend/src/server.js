@@ -80,23 +80,51 @@ app.use((req, res, next) => {
 
 // Middleware de gestion des erreurs global (doit être le dernier)
 app.use((err, req, res, next) => {
-  console.error('🔥 ERREUR GLOBALE:', err.stack);
+  console.error('🔥 ERREUR:', err.message);
   
-  // Erreur de validation Mongoose
+  // ✅ Erreur de parsing JSON (body-parser) - DOIT retourner 400
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ 
+      error: 'Invalid JSON', 
+      message: err.message,
+      code: 400 
+    });
+  }
+  
+  // ✅ Erreur de validation Mongoose
   if (err.name === 'ValidationError') {
     const errors = Object.values(err.errors).map(e => e.message);
-    return res.status(400).json({ error: 'Erreur de validation', details: errors });
+    return res.status(400).json({ 
+      error: 'Erreur de validation', 
+      details: errors,
+      code: 400 
+    });
   }
   
-  // Erreur de duplication (index unique)
+  // ✅ Erreur de duplication (index unique)
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern)[0];
-    return res.status(409).json({ error: `La valeur pour ${field} existe déjà` });
+    return res.status(409).json({ 
+      error: `La valeur pour ${field} existe déjà`,
+      field: field,
+      code: 409 
+    });
+  }
+
+  // ✅ Erreur de cast MongoDB (invalid ObjectId)
+  if (err.name === 'CastError') {
+    return res.status(400).json({
+      error: 'Invalid ID',
+      message: 'The provided ID is not valid',
+      code: 400
+    });
   }
   
-  // Erreur générique
-  res.status(500).json({ 
+  // ✅ Erreur générique - par défaut 500
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({ 
     error: err.message || 'Erreur interne du serveur',
+    code: status,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });

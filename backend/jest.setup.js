@@ -1,6 +1,3 @@
-// Jest setup file for integration tests
-// This file runs before any tests
-
 const mongoose = require('mongoose');
 require('dotenv').config({ path: '.env.test' });
 
@@ -24,6 +21,7 @@ beforeAll(async () => {
     
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
+      // Use local MongoDB for tests (NOT the cloud MongoDB)
       const mongoUri = process.env.MONGODB_URI || 'mongodb://admin:password123@localhost:27017/mulesoft-test?authSource=admin';
       
       console.log(`Connecting to MongoDB: ${mongoUri.split('@')[1] || 'unknown'}`);
@@ -32,8 +30,6 @@ beforeAll(async () => {
         serverSelectionTimeoutMS: 30000,
         connectTimeoutMS: 30000,
         retryWrites: false,
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
       });
       
       console.log('✅ Connected to MongoDB for tests');
@@ -45,6 +41,16 @@ beforeAll(async () => {
     require('./src/models/Integration');
     require('./src/models/Log');
     require('./src/models/Stats');
+    
+    // 🧹 NETTOYER les collections de test
+    try {
+      await mongoose.connection.collection('integrations').deleteMany({});
+      await mongoose.connection.collection('logs').deleteMany({});
+      await mongoose.connection.collection('stats').deleteMany({});
+      console.log('✅ Test collections cleaned');
+    } catch (cleanErr) {
+      console.warn('⚠️  Could not clean collections:', cleanErr.message);
+    }
     
   } catch (err) {
     console.error('❌ Failed to connect to MongoDB:', err.message);
@@ -58,6 +64,11 @@ beforeAll(async () => {
 afterAll(async () => {
   if (mongoose.connection.readyState !== 0) {
     try {
+      // 🧹 Nettoyer après les tests
+      await mongoose.connection.collection('integrations').deleteMany({});
+      await mongoose.connection.collection('logs').deleteMany({});
+      await mongoose.connection.collection('stats').deleteMany({});
+      
       await mongoose.connection.close();
       console.log('✅ Disconnected from MongoDB');
     } catch (err) {
@@ -66,11 +77,9 @@ afterAll(async () => {
   }
 });
 
-// Clear database between test suites (not between individual tests)
-// Individual tests clear via beforeEach
+// Clear database between test suites
 afterEach(async () => {
-  // Optional: Clear logs between test suites for cleaner output
-  // but keep integration/stats for debugging
+  // Optional: Clean between test suites if needed
 });
 
 // Suppress verbose console spam during tests
@@ -81,12 +90,9 @@ console.log = (...args) => {
   const msg = args[0]?.toString() || '';
   // Show setup/teardown messages and errors, but hide request logs
   if (msg.includes('Connected') || msg.includes('Disconnected') || msg.includes('Setup')
-      || msg.includes('❌') || msg.includes('✅')) {
+      || msg.includes('❌') || msg.includes('✅') || msg.includes('cleaned')) {
     originalLog(...args);
   }
 };
 
 // Keep error logging enabled
-// console.error stays as is
-
-
