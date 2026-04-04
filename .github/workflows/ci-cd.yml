@@ -72,7 +72,7 @@ jobs:
       - name: Install Frontend Dependencies
         run: |
               cd Frontend
-              npm install --package-lock-only
+              npm install 
       
       - name: Run Linting
         run: |
