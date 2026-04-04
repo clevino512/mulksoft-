@@ -1,4 +1,5 @@
 const Log = require('../models/Log');
+const Integration = require('../models/Integration');
 
 // Récupérer les logs avec filtres
 exports.getLogs = async (req, res) => {
@@ -49,6 +50,44 @@ exports.getLogs = async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Erreur getLogs:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Logs pour une intégration spécifique
+exports.getLogsByIntegration = async (req, res) => {
+  try {
+    const { integrationId } = req.params;
+    const { limit = 50, page = 1 } = req.query;
+    
+    // Vérifier que l'intégration existe
+    const integration = await Integration.findById(integrationId);
+    if (!integration) {
+      return res.status(404).json({ 
+        error: 'Intégration non trouvée',
+        integrationId 
+      });
+    }
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const logs = await Log.find({ integrationId })
+      .sort({ timestamp: -1 })
+      .limit(parseInt(limit))
+      .skip(skip);
+    
+    const total = await Log.countDocuments({ integrationId });
+    
+    res.json({
+      logs,
+      total,
+      integrationId,
+      integrationName: integration.name,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (error) {
+    console.error('❌ Erreur getLogsByIntegration:', error);
     res.status(500).json({ error: error.message });
   }
 };
