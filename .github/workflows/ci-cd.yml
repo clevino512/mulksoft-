@@ -71,7 +71,6 @@ jobs:
       
       - name: Install Frontend Dependencies
         run: |
-          cd Frontend
               cd Frontend
               npm install --package-lock-only
       
