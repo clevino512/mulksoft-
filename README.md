@@ -334,4 +334,4 @@ Ce projet est sous licence ISC. Voir LICENSE pour plus de détails.
 
 ## 📧 Support
 
-Pour questions ou problèmes : [contact@example.com]
+Pour questions ou problèmes : [clevino512@gmail.com]

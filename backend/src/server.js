@@ -26,15 +26,21 @@ app.use((req, res, next) => {
 });
 
 // ==================== CONNEXION MONGODB ====================
-mongoose.connect(process.env.MONGODB_URI)
-.then(() => {
-  console.log('✅ MongoDB connecté avec succès');
-  console.log('📊 Base de données:', mongoose.connection.name);
-})
-.catch(err => {
-  console.error('❌ Erreur de connexion MongoDB:', err.message);
-  console.error('💡 Vérifiez que MongoDB est démarré ou que votre URI est correcte');
-});
+// En test, la connexion est gérée par jest.setup.js
+if (process.env.NODE_ENV !== 'test') {
+  mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('✅ MongoDB connecté avec succès');
+    console.log('📊 Base de données:', mongoose.connection.name);
+  })
+  .catch(err => {
+    console.error('❌ Erreur de connexion MongoDB:', err.message);
+    console.error('💡 Vérifiez que MongoDB est démarré ou que votre URI est correcte');
+  });
+} else {
+  // En test, mongoose doit déjà être connecté via jest.setup.js
+  mongoose.set('bufferCommands', false);
+}
 
 // ==================== ROUTES API ====================
 app.use('/api/integrations', integrationRoutes);
@@ -97,11 +103,19 @@ app.use((err, req, res, next) => {
 
 // ==================== DÉMARRAGE DU SERVEUR ====================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`
+
+// Démarrer le serveur uniquement si ce n'est pas un test
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`
 ╔══════════════════════════════════════════════════════════╗
 ║     🚀 MuleSoft Integration Platform - Backend          ║
-╠
+║     Port: ${PORT}                                         ║
+║     Env: ${process.env.NODE_ENV || 'development'}                                   ║
 ╚══════════════════════════════════════════════════════════╝
-  `);
-});
+    `);
+  });
+}
+
+// Exporter l'app pour les tests (supertest)
+module.exports = app;
