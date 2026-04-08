@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4        # ✅ v3 → v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4      # ✅ v3 → v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -40,7 +40,7 @@ jobs:
       - name: Run Linting
         run: |
           cd backend
-          npm run lint || true  # Don't fail if linting isn't configured
+          npm run lint || true
       
       - name: Run Backend Tests
         run: |
@@ -48,7 +48,7 @@ jobs:
           npm test -- --coverage
       
       - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4  # ✅ v3 → v4
         with:
           files: ./backend/coverage/lcov.info
           flags: backend
@@ -60,10 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4        # ✅ v3 → v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4      # ✅ v3 → v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -71,8 +71,8 @@ jobs:
       
       - name: Install Frontend Dependencies
         run: |
-              cd Frontend
-              npm install 
+          cd Frontend
+          npm ci                         # ✅ npm install → npm ci (cohérent avec le lock file)
       
       - name: Run Linting
         run: |
@@ -92,13 +92,13 @@ jobs:
     if: github.event_name == 'push'
     
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4        # ✅ v3 → v4
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3  # ✅ v2 → v3
       
       - name: Build Backend Image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6    # ✅ v4 → v6
         with:
           context: ./backend
           push: false
@@ -107,7 +107,7 @@ jobs:
           cache-to: type=gha,mode=max
       
       - name: Build Frontend Image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6    # ✅ v4 → v6
         with:
           context: ./Frontend
           push: false
@@ -121,8 +121,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4        # ✅ v3 → v4
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -132,7 +132,7 @@ jobs:
           output: 'trivy-results.sarif'
       
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3  # ✅ v2 → v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -143,12 +143,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4        # ✅ v3 → v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4      # ✅ v3 → v4
         with:
-          node-version: '18'
+          node-version: '20'             # ✅ 18 → 20 (cohérent avec le reste)
       
       - name: Check Backend Dependencies
         run: |
@@ -169,7 +169,7 @@ jobs:
     
     steps:
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # ✅ v3 → v4 (cause de l'erreur)
         with:
           name: build-artifacts
           path: |
@@ -187,4 +187,3 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
